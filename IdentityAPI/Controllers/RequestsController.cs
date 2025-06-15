@@ -1,13 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Identity.Service;
+using Identity.Service.Model;
+using IdentityAPI.Model.DTOs;
+using IdentityAPI.Model.ViewModels;
+using IdentityAPI.Services.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Identity.Service;
-using IdentityAPI.Model;
-using IdentityAPI.Services.Interfaces;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace IdentityAPI.Controllers
 {
@@ -25,83 +27,77 @@ namespace IdentityAPI.Controllers
         }
 
         //GET: api/Requests
-       //[HttpGet]
-       // public async Task<ActionResult<IEnumerable<Request>>> GetRequest()
-       // {
-       //     return await _context.Request.ToListAsync();
-       // }
+       [HttpGet]
+        public async Task<ActionResult<IEnumerable<RequestViewModel>>> GetRequest()
+        {
+            _logger.LogInformation("Fetching all requests from the database.");
+            var requests = await _service.GetRequests();
+            if (requests == null || !requests.Any())
+            {
+                return NotFound();
+            }
+            return Ok(requests);
+        }
 
         //// GET: api/Requests/5
-        //[HttpGet("{id}")]
-        //public async Task<ActionResult<Request>> GetRequest(int id)
-        //{
-        //    var request = await _context.Request.FindAsync(id);
-
-        //    if (request == null)
-        //    {
-        //        return NotFound();
-        //    }
-
-        //    return request;
-        //}
+        [HttpGet("{id}")]
+        public async Task<ActionResult<RequestViewModel>> GetRequest(int id)
+        {
+            _logger.LogInformation($"Fetching request with ID {id} from the database.");
+            var request = await _service.GetRequest(id);
+            if (request == null)
+            {
+                return NotFound();
+            }
+            return Ok(request);
+        }
 
         //// PUT: api/Requests/5
-        //// To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        //[HttpPut("{id}")]
-        //public async Task<IActionResult> PutRequest(int id, Request request)
-        //{
-        //    if (id != request.Id)
-        //    {
-        //        return BadRequest();
-        //    }
-
-        //    _context.Entry(request).State = EntityState.Modified;
-
-        //    try
-        //    {
-        //        await _context.SaveChangesAsync();
-        //    }
-        //    catch (DbUpdateConcurrencyException)
-        //    {
-        //        if (!RequestExists(id))
-        //        {
-        //            return NotFound();
-        //        }
-        //        else
-        //        {
-        //            throw;
-        //        }
-        //    }
-
-        //    return NoContent();
-        //}
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateRequest(int id, [FromBody] RequestUpdateDTO request)
+        {
+            _logger.LogInformation($"Updating request with ID {id}.");
+            if (id != request.Id)
+            {
+                return BadRequest("Request ID mismatch.");
+            }
+            var result = await _service.UpdateRequest(id, request);
+            if (!result)
+            {
+                return NotFound();
+            }
+            return NoContent();
+        }
 
         //// POST: api/Requests
-        //// To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        //[HttpPost]
-        //public async Task<ActionResult<Request>> PostRequest(Request request)
-        //{
-        //    _context.Request.Add(request);
-        //    await _context.SaveChangesAsync();
-
-        //    return CreatedAtAction("GetRequest", new { id = request.Id }, request);
-        //}
+        [HttpPost]
+        public async Task<IActionResult> PostRequest([FromBody] RequestCreateDTO request)
+        {
+            _logger.LogInformation("Creating a new request.");
+            if (request == null)
+            {
+                return BadRequest("Request data is null.");
+            }
+            var requestId = await _service.PostRequest(request);
+            if (requestId == null)
+            {
+                return BadRequest("Invalid request data.");
+            }
+            return Created("api/Requests/" + requestId, request);
+        }
 
         //// DELETE: api/Requests/5
-        //[HttpDelete("{id}")]
-        //public async Task<IActionResult> DeleteRequest(int id)
-        //{
-        //    var request = await _context.Request.FindAsync(id);
-        //    if (request == null)
-        //    {
-        //        return NotFound();
-        //    }
-
-        //    _context.Request.Remove(request);
-        //    await _context.SaveChangesAsync();
-
-        //    return NoContent();
-        //}
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteRequest([FromRoute] int id)
+        {
+            _logger.LogInformation($"Deleting request with ID {id}.");
+            var result = await _service.DeleteRequest(id);
+            if (result == null)
+            {
+                return BadRequest("Request not found.");
+            }
+            return Ok(result);
+        }
 
     }
 }

@@ -25,6 +25,7 @@ namespace IdentityAPI
                 options.UseNpgsql(builder.Configuration.GetConnectionString("postgres")));
 
             builder.Services.AddScoped<IUserService, UserService>();
+            builder.Services.AddScoped<IRequestService, RequestService>();
 
             builder.Services.AddSwaggerGen(options =>
             {
