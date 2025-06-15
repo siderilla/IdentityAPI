@@ -57,14 +57,10 @@ namespace IdentityAPI.Controllers
         public async Task<IActionResult> UpdateRequest(int id, [FromBody] RequestUpdateDTO request)
         {
             _logger.LogInformation($"Updating request with ID {id}.");
-            if (id != request.Id)
-            {
-                return BadRequest("Request ID mismatch.");
-            }
             var result = await _service.UpdateRequest(id, request);
             if (!result)
             {
-                return NotFound();
+                return BadRequest("Request ID mismatch.");
             }
             return NoContent();
         }
