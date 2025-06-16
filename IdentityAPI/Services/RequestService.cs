@@ -3,6 +3,7 @@ using IdentityAPI.Model;
 using IdentityAPI.Model.DTOs;
 using IdentityAPI.Model.ViewModels;
 using IdentityAPI.Services.Interfaces;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 
 namespace IdentityAPI.Services
@@ -44,10 +45,13 @@ namespace IdentityAPI.Services
         }
 
 
-        public async Task<bool> UpdateRequest(int id, RequestUpdateDTO request)
+        public async Task<int> UpdateRequest(int id, RequestUpdateDTO request)
         {
+            var user = await _context.Users.FindAsync(request.UserId);
+            if (user == null) return -1;
+
             var entity = await _context.Requests.FindAsync(id);
-            if (entity == null) return false;
+            if (entity == null) return -2;
 
             if (!string.IsNullOrEmpty(request.Text) && request.Text != entity.Text)
             {
@@ -64,11 +68,14 @@ namespace IdentityAPI.Services
 
             _context.Requests.Update(entity);
             await _context.SaveChangesAsync();
-            return true;
+            return 0;
         }
 
         public async Task<int?> PostRequest(RequestCreateDTO request)
         {
+            var user = await _context.Users.FindAsync(request.UserId);
+            if (user == null) return null;
+
             if (request == null) return null;
             var entity = new Request
             {

@@ -16,5 +16,9 @@ namespace Identity.Service.Model
         public string Password { get; set; }
         public ICollection<Request> Requests { get; set; }
 
+
+        public ICollection<UserRole> UserRole { get; set; }
+
+
     }
 }

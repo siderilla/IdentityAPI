@@ -32,7 +32,7 @@ namespace IdentityAPI.Controllers
         {
             _logger.LogInformation("Fetching all requests from the database.");
             var requests = await _service.GetRequests();
-            if (requests == null || !requests.Any())
+            if (requests == null)
             {
                 return NotFound();
             }
@@ -58,7 +58,7 @@ namespace IdentityAPI.Controllers
         {
             _logger.LogInformation($"Updating request with ID {id}.");
             var result = await _service.UpdateRequest(id, request);
-            if (!result)
+            if (result == null)
             {
                 return BadRequest("Request ID mismatch.");
             }

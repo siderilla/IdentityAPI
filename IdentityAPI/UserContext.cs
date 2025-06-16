@@ -23,6 +23,8 @@ namespace Identity.Service
 
         public DbSet<User> Users { get; set; }
         public DbSet<Request> Requests { get; set; }
+        public DbSet<UserRole> UserRoles { get; set; }
+        public DbSet<Role> Roles { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -31,6 +33,7 @@ namespace Identity.Service
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+
             modelBuilder.Entity<User>().ToTable("users");
             modelBuilder.Entity<User>().HasKey(u => u.Id);
             modelBuilder.Entity<User>().Property(u => u.Id).ValueGeneratedOnAdd();
@@ -49,6 +52,25 @@ namespace Identity.Service
                         .WithMany(x => x.Requests)
                         .HasForeignKey(e => e.UserId)
                         .OnDelete(DeleteBehavior.Cascade));
+
+            modelBuilder.Entity<Role>().ToTable("roles");
+            modelBuilder.Entity<Role>().HasKey(r => r.Id);
+            modelBuilder.Entity<Role>().Property(r => r.Id).ValueGeneratedOnAdd();
+            modelBuilder.Entity<Role>().Property(r => r.Description).IsRequired().HasMaxLength(100);
+
+            modelBuilder.Entity<UserRole>().ToTable("user_roles");
+            modelBuilder.Entity<UserRole>().HasKey(ur => new { ur.UserId, ur.RoleId });
+            modelBuilder.Entity<UserRole>(entity =>
+            {
+                entity.HasOne(ur => ur.User)
+                      .WithMany(u => u.UserRole)
+                      .HasForeignKey(ur => ur.UserId)
+                      .OnDelete(DeleteBehavior.Cascade);
+                entity.HasOne(ur => ur.Role)
+                      .WithMany(r => r.UserRole)
+                      .HasForeignKey(ur => ur.RoleId)
+                      .OnDelete(DeleteBehavior.Cascade);
+            });
         }
 
 

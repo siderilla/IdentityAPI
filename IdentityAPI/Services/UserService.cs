@@ -22,6 +22,7 @@ namespace IdentityAPI.Services
             return await _context.Users
                 .Select(u => new UserViewModel
                 {
+                    Id = u.Id,
                     Name = u.Name,
                     Surname = u.Surname,
                     Email = u.Email
@@ -38,6 +39,7 @@ namespace IdentityAPI.Services
             }
             return new UserViewModel
             {
+                Id = entity.Id,
                 Name = entity.Name,
                 Surname = entity.Surname,
                 Email = entity.Email
